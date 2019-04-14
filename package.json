@@ -1,0 +1,53 @@
+{
+  "name": "typebundle",
+  "version": "0.0.0",
+  "description": "A personalized build process for projects.",
+  "main": "dist/index.js",
+  "source": "src/index.js",
+  "bin": "dist/cli.js",
+  "files": [
+    "src",
+    "dist",
+    "types"
+  ],
+  "scripts": {
+    "build": "npm run -s build:babel && npm run -s build:self && npm run -s build:types",
+    "build:babel": "babel-node --extensions \".ts\" src/cli.ts \"src/{cli,index}.ts\" dist",
+    "build:self": "node dist/cli.js \"src/{cli,index}.ts\" dist",
+    "build:types": "tsc --emitDeclarationOnly --outdir types --declaration --allowSyntheticDefaultImports src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rdmurphy/typebundle.git"
+  },
+  "keywords": [
+    "bundle",
+    "rollup",
+    "libraries",
+    "builder"
+  ],
+  "author": "Ryan Murphy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rdmurphy/typebundle/issues"
+  },
+  "homepage": "https://github.com/rdmurphy/typebundle#readme",
+  "dependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "@babel/preset-typescript": "^7.3.3",
+    "builtin-modules": "^3.1.0",
+    "rollup": "^1.10.0",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-terser": "^4.0.4",
+    "tiny-glob": "^0.2.6"
+  },
+  "devDependencies": {
+    "@babel/node": "^7.2.2",
+    "@types/node": "^11.13.4",
+    "np": "*"
+  }
+}
