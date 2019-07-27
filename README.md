@@ -11,7 +11,7 @@ npm i -D typebundle
 ## Usage
 
 ```sh
-npx typebundle <input> <output_directory>
+npx typebundle <input> --output=<output_directory>
 ```
 
 ## License
