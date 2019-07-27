@@ -10,7 +10,7 @@ const mriConfig = {
   boolean: ['compress'],
   default: {
     compress: false,
-    output: 'lib',
+    output: 'dist',
   },
 };
 

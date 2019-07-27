@@ -44,6 +44,8 @@ async function createRollupConfig({
 
   let banner = '';
 
+  const externalTest = new RegExp(`^(${external.join('|')})($|/)`);
+
   const inputOptions: InputOptions = {
     input,
     external: id => {
@@ -52,7 +54,8 @@ async function createRollupConfig({
         return true;
       }
 
-      return external.includes(id);
+      // otherwise do what you'd normally expect for exclusion
+      return externalTest.test(id);
     },
     plugins: [
       {
@@ -134,18 +137,20 @@ export async function bundler({
 
   const pkg = await getConfig(cwd);
 
-  const externalDependencies = Object.keys(pkg.dependencies || {});
+  const pkgDependencies = Object.keys(pkg.dependencies || {});
 
   const inputs = await glob(input, { absolute: true });
 
   for (let idx = 0; idx < inputs.length; idx++) {
     const input = inputs[idx];
 
+    const externalDependencies = pkgDependencies.concat(
+      inputs.filter(e => e !== input)
+    );
+
     const { inputOptions, outputOptions } = await createRollupConfig({
       compress,
-      externalDependencies: externalDependencies.concat(
-        inputs.filter(e => e !== input)
-      ),
+      externalDependencies,
       input,
       nodeTarget,
       outputDir,
