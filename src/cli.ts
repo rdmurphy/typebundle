@@ -1,12 +1,28 @@
 #!/usr/bin/env node
 
-import { bundler } from './';
+// packages
+import mri from 'mri';
 
-async function main(argv_) {
-  const input = argv_[2];
-  const outputDir = argv_[3] || 'dist';
+// local
+import { bundler } from '.';
 
-  await bundler({ input, outputDir });
+const mriConfig = {
+  boolean: ['compress'],
+  default: {
+    compress: false,
+    output: 'lib',
+  },
+};
+
+async function main(argv_: string[]) {
+  const args = mri(argv_.slice(2), mriConfig);
+
+  const input = args._[0];
+  const outputDir = args.output;
+  const compress = args.compress;
+  const nodeTarget = args.target;
+
+  await bundler({ compress, input, nodeTarget, outputDir });
 }
 
 main(process.argv).catch(console.error);

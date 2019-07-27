@@ -4,17 +4,19 @@
   "description": "A personalized build process for projects.",
   "main": "dist/index.js",
   "source": "src/index.js",
-  "bin": "dist/cli.js",
+  "bin": {
+    "typebundle": "dist/cli.js"
+  },
   "files": [
     "src",
     "dist",
     "types"
   ],
   "scripts": {
-    "build": "npm run -s build:babel && npm run -s build:self && npm run -s build:types",
-    "build:babel": "babel-node --extensions \".ts\" src/cli.ts \"src/{cli,index}.ts\" dist",
-    "build:self": "node dist/cli.js \"src/{cli,index}.ts\" dist",
-    "build:types": "tsc --emitDeclarationOnly --outdir types --declaration --allowSyntheticDefaultImports src/index.ts",
+    "build": "npm run -s build:babel && npm run -s build:self && npm run build:types",
+    "build:babel": "babel-node --extensions \".ts\" src/cli.ts \"src/{cli,index}.ts\" --target=8 --output=dist",
+    "build:self": "node dist/cli.js \"src/{cli,index}.ts\" --target=8 --output=dist",
+    "build:types": "tsc --emitDeclarationOnly --outdir types --declaration --allowSyntheticDefaultImports src/{cli,index}.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -34,20 +36,25 @@
   },
   "homepage": "https://github.com/rdmurphy/typebundle#readme",
   "dependencies": {
-    "@babel/core": "^7.4.3",
-    "@babel/preset-env": "^7.4.3",
+    "@babel/core": "^7.5.4",
+    "@babel/preset-env": "^7.5.4",
     "@babel/preset-typescript": "^7.3.3",
     "builtin-modules": "^3.1.0",
-    "rollup": "^1.10.0",
-    "rollup-plugin-babel": "^4.3.2",
-    "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-node-resolve": "^4.2.3",
-    "rollup-plugin-terser": "^4.0.4",
-    "tiny-glob": "^0.2.6"
+    "mri": "^1.1.4",
+    "rollup": "^1.17.0",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-commonjs": "^10.0.1",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-terser": "^5.1.1",
+    "tiny-glob": "^0.2.6",
+    "typescript": "^3.5.3"
   },
   "devDependencies": {
-    "@babel/node": "^7.2.2",
-    "@types/node": "^11.13.4",
-    "np": "*"
-  }
+    "@babel/node": "^7.5.0",
+    "@newswire/prettier-config": "^2.0.0",
+    "@types/node": "^12.6.3",
+    "np": "5.0.3",
+    "prettier": "^1.18.2"
+  },
+  "prettier": "@newswire/prettier-config"
 }

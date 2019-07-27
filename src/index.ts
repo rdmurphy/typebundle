@@ -1,5 +1,5 @@
 // native
-import { parse, resolve } from 'path';
+import { basename, parse, resolve } from 'path';
 
 // packages
 import babelPresetEnv from '@babel/preset-env';
@@ -17,28 +17,47 @@ import { hashbangRegex, readFile } from './utils';
 
 const extensions = ['.ts', '.js', '.mjs'];
 
-async function getConfig(cwd) {
+async function getConfig(cwd: string) {
   const pkg = await readFile(resolve(cwd, 'package.json'), 'utf8');
 
   return JSON.parse(pkg);
 }
 
+interface createRollupConfigOptions {
+  compress?: boolean;
+  externalDependencies?: string[];
+  input: string;
+  nodeTarget?: string;
+  outputDir: string;
+  pkgMain: string;
+}
+
 async function createRollupConfig({
+  compress = true,
   externalDependencies = [],
   input,
+  nodeTarget = 'current',
   outputDir,
-}) {
+  pkgMain,
+}: createRollupConfigOptions) {
   const external = externalDependencies.concat(builtinModules);
 
   let banner = '';
 
   const inputOptions: InputOptions = {
     input,
-    external,
+    external: id => {
+      // a special case for when we are importing a local index
+      if (id === '.') {
+        return true;
+      }
+
+      return external.includes(id);
+    },
     plugins: [
       {
         name: 'hashbang-check',
-        transform(code) {
+        transform(code: string) {
           const match = code.match(hashbangRegex);
 
           if (match != null) {
@@ -59,11 +78,11 @@ async function createRollupConfig({
         exclude: 'node_modules/**',
         extensions,
         presets: [
-          [babelPresetEnv, { targets: { node: 8 } }],
+          [babelPresetEnv, { targets: { node: nodeTarget } }],
           babelPresetTypescript,
         ],
       }),
-      true &&
+      compress &&
         terser({
           output: { comments: false },
           compress: {
@@ -80,47 +99,57 @@ async function createRollupConfig({
   const inputFileName = parse(input).name;
   const bannerFn = () => banner;
 
+  const paths = {
+    '.': `./${basename(pkgMain)}`,
+  };
+
   const outputOptions: OutputOptions[] = [
     {
       banner: bannerFn,
       esModule: false,
       file: resolve(outputDir, `${inputFileName}.js`),
-      format: 'commonjs',
+      format: 'cjs',
+      paths,
       strict: false,
     },
-    // {
-    //   banner: bannerFn,
-    //   esModule: false,
-    //   file: resolve(outputDir, `${inputFileName}.mjs`),
-    //   format: 'module',
-    //   strict: false,
-    // },
   ];
 
   return { inputOptions, outputOptions };
 }
 
 interface BundlerOptions {
+  compress: boolean;
   input: string;
+  nodeTarget: string;
   outputDir: string;
 }
 
-export async function bundler({ input, outputDir }: BundlerOptions) {
+export async function bundler({
+  compress,
+  input,
+  nodeTarget,
+  outputDir,
+}: BundlerOptions) {
   const cwd = process.cwd();
 
   const pkg = await getConfig(cwd);
 
   const externalDependencies = Object.keys(pkg.dependencies || {});
 
-  const inputs = await glob(input);
+  const inputs = await glob(input, { absolute: true });
 
   for (let idx = 0; idx < inputs.length; idx++) {
     const input = inputs[idx];
 
     const { inputOptions, outputOptions } = await createRollupConfig({
-      externalDependencies,
+      compress,
+      externalDependencies: externalDependencies.concat(
+        inputs.filter(e => e !== input)
+      ),
       input,
+      nodeTarget,
       outputDir,
+      pkgMain: pkg.main,
     });
 
     const bundle = await rollup(inputOptions);

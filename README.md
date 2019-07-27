@@ -1,15 +1,17 @@
 # Typebundle
 
-Zero-config Node.js library bundler with support for Babel-transpiled TypeScript.
+Zero-config Node.js library bundler with support for Babel-transpiled TypeScript. A work in progress!
 
 ## Installation
 
-None yet.
+```sh
+npm i -D typebundle
+```
 
 ## Usage
 
 ```sh
-typebundle <input> <output_directory>
+npx typebundle <input> <output_directory>
 ```
 
 ## License
