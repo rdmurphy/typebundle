@@ -28,7 +28,8 @@
     "bundle",
     "rollup",
     "libraries",
-    "builder"
+    "builder",
+    "typescript"
   ],
   "author": "Ryan Murphy",
   "license": "MIT",
