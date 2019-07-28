@@ -28,6 +28,7 @@ interface createRollupConfigOptions {
   externalDependencies?: string[];
   input: string;
   nodeTarget?: string;
+  withMultipleInputs: boolean;
   outputDir: string;
   pkgMain: string;
 }
@@ -37,6 +38,7 @@ async function createRollupConfig({
   externalDependencies = [],
   input,
   nodeTarget = 'current',
+  withMultipleInputs,
   outputDir,
   pkgMain,
 }: createRollupConfigOptions) {
@@ -50,7 +52,7 @@ async function createRollupConfig({
     input,
     external: id => {
       // a special case for when we are importing a local index
-      if (id === '.') {
+      if (withMultipleInputs && id === '.') {
         return true;
       }
 
@@ -102,9 +104,11 @@ async function createRollupConfig({
   const inputFileName = parse(input).name;
   const bannerFn = () => banner;
 
-  const paths = {
-    '.': `./${basename(pkgMain)}`,
-  };
+  const paths = {};
+
+  if (pkgMain) {
+    paths['.'] = `./${basename(pkgMain)}`;
+  }
 
   const outputOptions: OutputOptions[] = [
     {
@@ -141,6 +145,8 @@ export async function bundler({
 
   const inputs = await glob(input, { absolute: true });
 
+  const withMultipleInputs = inputs.length > 1;
+
   for (let idx = 0; idx < inputs.length; idx++) {
     const input = inputs[idx];
 
@@ -153,6 +159,7 @@ export async function bundler({
       externalDependencies,
       input,
       nodeTarget,
+      withMultipleInputs,
       outputDir,
       pkgMain: pkg.main,
     });
