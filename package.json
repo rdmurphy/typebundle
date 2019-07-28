@@ -1,6 +1,6 @@
 {
   "name": "typebundle",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A personalized build process for projects.",
   "main": "dist/index.js",
   "source": "src/index.js",
