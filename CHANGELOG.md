@@ -9,13 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2019-07-29
 
-## Added
+### Added
 
 - Typescript declaration files (`.d.ts`) are now automatically generated as part of the bundle.
 
 ## [0.2.0] - 2019-07-27
 
-## Fixed
+### Fixed
 
 - No longer required to provide a "main" field in your `package.json`. This is still messy but at least works well enough for a single entrypoint.
 
