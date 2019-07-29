@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2019-07-29
+
+## Added
+
+- Typescript declaration files (`.d.ts`) are now automatically generated as part of the bundle.
+
 ## [0.2.0] - 2019-07-27
 
 ## Fixed
