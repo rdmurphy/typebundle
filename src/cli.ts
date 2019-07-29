@@ -21,8 +21,9 @@ async function main(argv_: string[]) {
   const outputDir = args.output;
   const compress = args.compress;
   const nodeTarget = args.target;
+  const typesDir = args.types;
 
-  await bundler({ compress, input, nodeTarget, outputDir });
+  await bundler({ compress, input, nodeTarget, outputDir, typesDir });
 }
 
 main(process.argv).catch(console.error);

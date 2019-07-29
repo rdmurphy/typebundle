@@ -1,4 +1,5 @@
 // native
+import { spawn } from 'child_process';
 import { basename, parse, resolve } from 'path';
 
 // packages
@@ -124,11 +125,28 @@ async function createRollupConfig({
   return { inputOptions, outputOptions };
 }
 
+function createTypes({ input, output }: { input: string; output: string }) {
+  return new Promise((fulfill, reject) => {
+    const child = spawn('tsc', [
+      '--declaration',
+      '--emitDeclarationOnly',
+      '--allowSyntheticDefaultImports',
+      '--declarationDir',
+      output,
+      input,
+    ]);
+
+    child.on('error', reject);
+    child.on('exit', fulfill);
+  });
+}
+
 interface BundlerOptions {
   compress: boolean;
   input: string;
   nodeTarget: string;
   outputDir: string;
+  typesDir?: string;
 }
 
 export async function bundler({
@@ -136,17 +154,27 @@ export async function bundler({
   input,
   nodeTarget,
   outputDir,
+  typesDir,
 }: BundlerOptions) {
+  // the current working directory
   const cwd = process.cwd();
 
+  // if a custom typesDir was not passed, use outputDir
+  typesDir = typesDir || outputDir;
+
+  // get the contents of package.json
   const pkg = await getConfig(cwd);
 
+  // pull out all of the dependencies to flag externals
   const pkgDependencies = Object.keys(pkg.dependencies || {});
 
+  // find all the input TypeScript files
   const inputs = await glob(input, { absolute: true });
 
+  // if we have more than one input, flag this as a multi-input run
   const withMultipleInputs = inputs.length > 1;
 
+  // loop thorugh the inputs, creating a rollup configuraion for each one
   for (let idx = 0; idx < inputs.length; idx++) {
     const input = inputs[idx];
 
@@ -167,7 +195,10 @@ export async function bundler({
     const bundle = await rollup(inputOptions);
 
     for (let idx = 0; idx < outputOptions.length; idx++) {
-      await bundle.write(outputOptions[idx]);
+      const output = outputOptions[idx];
+
+      await bundle.write(output);
+      await createTypes({ input, output: typesDir });
     }
   }
 }

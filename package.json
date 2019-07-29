@@ -13,10 +13,9 @@
     "types"
   ],
   "scripts": {
-    "build": "npm run -s build:babel && npm run -s build:self && npm run build:types",
-    "build:babel": "babel-node --extensions \".ts\" src/cli.ts \"src/{cli,index}.ts\" --target=8 --output=dist --compress",
-    "build:self": "node dist/cli.js \"src/{cli,index}.ts\" --target=8 --output=dist --compress",
-    "build:types": "tsc --emitDeclarationOnly --outdir types --declaration --allowSyntheticDefaultImports src/{cli,index}.ts",
+    "build": "npm run -s build:babel && npm run -s build:self",
+    "build:babel": "babel-node --extensions \".ts\" src/cli.ts \"src/{cli,index}.ts\" --target=8 --output=dist --compress --types=types",
+    "build:self": "node dist/cli.js \"src/{cli,index}.ts\" --target=8 --output=dist --compress --types=types",
     "prerelease": "npm run build",
     "release": "np",
     "test": "echo \"Error: no test specified\" && exit 0"
