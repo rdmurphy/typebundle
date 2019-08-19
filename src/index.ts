@@ -9,6 +9,7 @@ import builtinModules from 'builtin-modules';
 import { rollup, OutputOptions, InputOptions } from 'rollup';
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
+import json from 'rollup-plugin-json';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
 import glob from 'tiny-glob';
@@ -79,6 +80,7 @@ async function createRollupConfig({
       },
       nodeResolve({ extensions }),
       commonjs(),
+      json(),
       babel({
         babelrc: false,
         exclude: 'node_modules/**',
