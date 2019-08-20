@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added support for watch mode. Can be activated by passing the `--watch` in the command. When this mode is activated type declaration is _skipped_.
+
 ## [0.4.0] - 2019-08-19
 
 ### Added
