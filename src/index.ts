@@ -6,7 +6,7 @@ import { basename, parse, resolve } from 'path';
 import babelPresetEnv from '@babel/preset-env';
 import babelPresetTypescript from '@babel/preset-typescript';
 import builtinModules from 'builtin-modules';
-import { rollup, OutputOptions, InputOptions } from 'rollup';
+import { rollup, watch, OutputOptions, InputOptions } from 'rollup';
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 import json from 'rollup-plugin-json';
@@ -149,6 +149,7 @@ interface BundlerOptions {
   nodeTarget: string;
   outputDir: string;
   typesDir?: string;
+  watchBuild?: boolean;
 }
 
 export async function bundler({
@@ -157,6 +158,7 @@ export async function bundler({
   nodeTarget,
   outputDir,
   typesDir,
+  watchBuild,
 }: BundlerOptions) {
   // the current working directory
   const cwd = process.cwd();
@@ -171,10 +173,12 @@ export async function bundler({
   const pkgDependencies = Object.keys(pkg.dependencies || {});
 
   // find all the input TypeScript files
-  const inputs = await glob(input, { absolute: true });
+  const inputs = await glob(input);
 
   // if we have more than one input, flag this as a multi-input run
   const withMultipleInputs = inputs.length > 1;
+
+  const runs = [];
 
   // loop thorugh the inputs, creating a rollup configuraion for each one
   for (let idx = 0; idx < inputs.length; idx++) {
@@ -184,7 +188,7 @@ export async function bundler({
       inputs.filter(e => e !== input)
     );
 
-    const { inputOptions, outputOptions } = await createRollupConfig({
+    const options = await createRollupConfig({
       compress,
       externalDependencies,
       input,
@@ -194,13 +198,44 @@ export async function bundler({
       pkgMain: pkg.main,
     });
 
-    const bundle = await rollup(inputOptions);
+    runs.push(options);
+  }
 
-    for (let idx = 0; idx < outputOptions.length; idx++) {
-      const output = outputOptions[idx];
+  for (const { inputOptions, outputOptions } of runs) {
+    if (watchBuild) {
+      const watcher = watch(
+        Object.assign(
+          {
+            output: outputOptions,
+            watch: {
+              exclude: 'node_modules/**',
+            },
+          },
+          inputOptions
+        )
+      );
 
-      await bundle.write(output);
-      await createTypes({ input, output: typesDir });
+      watcher.on('event', ({ code, error }) => {
+        switch (code) {
+          case 'FATAL':
+            throw new Error(error);
+          case 'ERROR':
+            console.error(error);
+            break;
+          case 'END':
+            console.log(`Successful build. (${inputOptions.input})`);
+            break;
+        }
+      });
+    } else {
+      const bundle = await rollup(inputOptions);
+
+      for (let idx = 0; idx < outputOptions.length; idx++) {
+        const output = outputOptions[idx];
+
+        await bundle.write(output);
+        await createTypes({ input, output: typesDir });
+      }
     }
   }
 }
