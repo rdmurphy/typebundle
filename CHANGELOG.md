@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2019-09-19
+
+## Fixed
+
+- Fixed output of TypeScript types with multi-entry inputs.
+
 ## [0.5.0] - 2019-08-19
 
 ### Added

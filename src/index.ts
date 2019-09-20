@@ -182,16 +182,16 @@ export async function bundler({
 
   // loop thorugh the inputs, creating a rollup configuraion for each one
   for (let idx = 0; idx < inputs.length; idx++) {
-    const input = inputs[idx];
+    const entry = inputs[idx];
 
     const externalDependencies = pkgDependencies.concat(
-      inputs.filter(e => e !== input)
+      inputs.filter(e => e !== entry)
     );
 
     const options = await createRollupConfig({
       compress,
       externalDependencies,
-      input,
+      input: entry,
       nodeTarget,
       withMultipleInputs,
       outputDir,
@@ -234,7 +234,10 @@ export async function bundler({
         const output = outputOptions[idx];
 
         await bundle.write(output);
-        await createTypes({ input, output: typesDir });
+        await createTypes({
+          input: inputOptions.input as string,
+          output: typesDir,
+        });
       }
     }
   }
