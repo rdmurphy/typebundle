@@ -1,23 +1,22 @@
 // native
-import { spawn } from 'child_process';
-import { basename, parse, resolve } from 'path';
+import { basename, format, parse, resolve } from 'path';
 
 // packages
 import babelPresetEnv from '@babel/preset-env';
 import babelPresetTypescript from '@babel/preset-typescript';
 import builtinModules from 'builtin-modules';
+import { outputFile, readFile } from 'fs-extra';
 import { rollup, watch, OutputOptions, InputOptions } from 'rollup';
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
+import dts from 'rollup-plugin-dts';
 import json from 'rollup-plugin-json';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
 import glob from 'tiny-glob';
 
-// local
-import { hashbangRegex, readFile } from './utils';
-
 const extensions = ['.ts', '.js', '.mjs'];
+const hashbangRegex = /^#!(.*)/;
 
 async function getConfig(cwd: string) {
   const pkg = await readFile(resolve(cwd, 'package.json'), 'utf8');
@@ -107,7 +106,7 @@ async function createRollupConfig({
   const inputFileName = parse(input).name;
   const bannerFn = () => banner;
 
-  const paths = {};
+  const paths = {} as { [key: string]: string };
 
   if (pkgMain) {
     paths['.'] = `./${basename(pkgMain)}`;
@@ -127,20 +126,52 @@ async function createRollupConfig({
   return { inputOptions, outputOptions };
 }
 
-function createTypes({ input, output }: { input: string; output: string }) {
-  return new Promise((fulfill, reject) => {
-    const child = spawn('tsc', [
-      '--declaration',
-      '--emitDeclarationOnly',
-      '--allowSyntheticDefaultImports',
-      '--declarationDir',
-      output,
-      input,
-    ]);
+function dtsOnWarn(warning: { code: string; message: string }) {
+  if (warning.code === 'EMPTY_BUNDLE') return;
 
-    child.on('error', reject);
-    child.on('exit', fulfill);
-  });
+  console.error(warning.message);
+}
+
+async function createTypes({
+  input,
+  outputDir,
+}: {
+  input: string;
+  outputDir: string;
+}) {
+  // build our Rollup input options for rollup-plugin-dts
+  const inputOptions = {
+    input,
+    plugins: [dts()],
+    onwarn: dtsOnWarn,
+  };
+
+  // generate our bundle
+  const bundle = await rollup(inputOptions);
+
+  // pull out the name of the input file
+  const { name } = parse(input);
+
+  // build our Rollup output options
+  const outputOptions = {
+    file: resolve(outputDir, format({ name, ext: '.d.ts' })),
+    format: 'esm',
+  };
+
+  // generate our .d.ts file
+  const results = await bundle.generate(outputOptions);
+
+  // we have only a single output
+  const output = results.output[0];
+
+  // output file name
+  const fileName = resolve(outputDir, output.fileName);
+
+  // grab the raw code output
+  const { code } = output;
+
+  // if the code empty, we export an empty module, otherwise just save it out
+  await outputFile(fileName, code.trim().length ? code : 'export {};\n');
 }
 
 interface BundlerOptions {
@@ -180,7 +211,7 @@ export async function bundler({
 
   const runs = [];
 
-  // loop thorugh the inputs, creating a rollup configuraion for each one
+  // loop through the inputs, creating a rollup configuration for each one
   for (let idx = 0; idx < inputs.length; idx++) {
     const entry = inputs[idx];
 
@@ -236,7 +267,7 @@ export async function bundler({
         await bundle.write(output);
         await createTypes({
           input: inputOptions.input as string,
-          output: typesDir,
+          outputDir: typesDir,
         });
       }
     }

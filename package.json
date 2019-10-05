@@ -43,10 +43,12 @@
     "@babel/preset-env": "^7.6.2",
     "@babel/preset-typescript": "^7.6.0",
     "builtin-modules": "^3.1.0",
+    "fs-extra": "^8.1.0",
     "mri": "^1.1.4",
     "rollup": "^1.23.0",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-dts": "^1.1.10",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-terser": "^5.1.2",
@@ -56,6 +58,7 @@
   "devDependencies": {
     "@babel/node": "^7.6.2",
     "@newswire/prettier-config": "^2.0.0",
+    "@types/fs-extra": "^8.0.0",
     "@types/node": "^12.7.11",
     "np": "^5.1.0",
     "prettier": "^1.18.2"
