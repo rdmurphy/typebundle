@@ -17,7 +17,7 @@
     "build:babel": "babel-node --extensions \".ts\" src/cli.ts \"src/{cli,index}.ts\" --target=8 --output=dist --compress --types=types",
     "build:self": "node dist/cli.js \"src/{cli,index}.ts\" --target=8 --output=dist --compress --types=types",
     "prerelease": "npm run build",
-    "release": "np --no-yarn",
+    "release": "np",
     "test": "echo \"Error: no test specified\" && exit 0",
     "watch": "npm run build:babel -- --watch --no-compress"
   },

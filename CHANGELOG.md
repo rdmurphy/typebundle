@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2019-10-04
+
+### Changed
+
+- Type declarations are now generated using `rollup` and `rollup-plugin-dts`, meaning our generated types also get tree-shaking and are converted into a single file.
+
 ## [0.5.1] - 2019-09-19
 
 ## Fixed
