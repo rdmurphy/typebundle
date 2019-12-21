@@ -36,6 +36,7 @@ interface createRollupConfigOptions {
 
 async function createRollupConfig({
   compress = true,
+  esm = false,
   externalDependencies = [],
   input,
   nodeTarget = 'current',
@@ -91,12 +92,13 @@ async function createRollupConfig({
       }),
       compress &&
         terser({
-          output: { comments: false },
           compress: {
             keep_infinity: true,
             pure_getters: true,
             passes: 10,
           },
+          ecma: 8,
+          output: { comments: false },
           toplevel: true,
           warnings: true,
         }),
@@ -121,7 +123,15 @@ async function createRollupConfig({
       paths,
       strict: false,
     },
-  ];
+    esm && {
+      banner: bannerFn,
+      esModule: false,
+      file: resolve(outputDir, `${inputFileName}.mjs`),
+      format: 'esm',
+      paths,
+      strict: false,
+    },
+  ].filter(Boolean);
 
   return { inputOptions, outputOptions };
 }
@@ -176,6 +186,7 @@ async function createTypes({
 
 interface BundlerOptions {
   compress: boolean;
+  esm: boolean;
   input: string;
   nodeTarget: string;
   outputDir: string;
@@ -185,6 +196,7 @@ interface BundlerOptions {
 
 export async function bundler({
   compress,
+  esm,
   input,
   nodeTarget,
   outputDir,
@@ -221,6 +233,7 @@ export async function bundler({
 
     const options = await createRollupConfig({
       compress,
+      esm,
       externalDependencies,
       input: entry,
       nodeTarget,

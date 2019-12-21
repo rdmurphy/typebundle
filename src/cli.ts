@@ -7,9 +7,10 @@ import mri from 'mri';
 import { bundler } from '.';
 
 const mriConfig = {
-  boolean: ['compress'],
+  boolean: ['compress', 'esm'],
   default: {
     compress: false,
+    esm: false,
     output: 'dist',
     watch: false,
   },
@@ -21,12 +22,14 @@ async function main(argv_: string[]) {
   const input = args._[0];
   const outputDir = args.output;
   const compress = args.compress;
+  const esm = args.esm;
   const nodeTarget = args.target;
   const typesDir = args.types;
   const watchBuild = args.watch;
 
   await bundler({
     compress,
+    esm,
     input,
     nodeTarget,
     outputDir,
