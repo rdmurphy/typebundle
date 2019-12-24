@@ -59,7 +59,7 @@
     "@babel/node": "^7.6.3",
     "@newswire/prettier-config": "^2.0.0",
     "@types/fs-extra": "^8.0.1",
-    "@types/node": "^12.12.5",
+    "@types/node": "^13.1.0",
     "np": "^5.1.2",
     "prettier": "^1.18.2"
   },
