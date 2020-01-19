@@ -6,7 +6,14 @@ import babelPresetEnv from '@babel/preset-env';
 import babelPresetTypescript from '@babel/preset-typescript';
 import builtinModules from 'builtin-modules';
 import { outputFile, readFile } from 'fs-extra';
-import { rollup, watch, OutputOptions, InputOptions } from 'rollup';
+import {
+  rollup,
+  watch,
+  OutputOptions,
+  InputOptions,
+  RollupWarning,
+  RollupWatchOptions,
+} from 'rollup';
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 import dts from 'rollup-plugin-dts';
@@ -126,7 +133,7 @@ async function createRollupConfig({
   return { inputOptions, outputOptions };
 }
 
-function dtsOnWarn(warning: { code: string; message: string }) {
+function dtsOnWarn(warning: RollupWarning) {
   if (warning.code === 'EMPTY_BUNDLE') return;
 
   console.error(warning.message);
@@ -140,7 +147,7 @@ async function createTypes({
   outputDir: string;
 }) {
   // build our Rollup input options for rollup-plugin-dts
-  const inputOptions = {
+  const inputOptions: InputOptions = {
     input,
     plugins: [dts()],
     onwarn: dtsOnWarn,
@@ -153,7 +160,7 @@ async function createTypes({
   const { name } = parse(input);
 
   // build our Rollup output options
-  const outputOptions = {
+  const outputOptions: OutputOptions = {
     file: resolve(outputDir, format({ name, ext: '.d.ts' })),
     format: 'esm',
   };
@@ -234,7 +241,7 @@ export async function bundler({
 
   for (const { inputOptions, outputOptions } of runs) {
     if (watchBuild) {
-      const watcher = watch(
+      const watchOptions: RollupWatchOptions[] = [
         Object.assign(
           {
             output: outputOptions,
@@ -243,16 +250,15 @@ export async function bundler({
             },
           },
           inputOptions
-        )
-      );
+        ),
+      ];
 
-      watcher.on('event', ({ code, error }) => {
-        switch (code) {
-          case 'FATAL':
-            throw new Error(error);
+      const watcher = watch(watchOptions);
+
+      watcher.on('event', event => {
+        switch (event.code) {
           case 'ERROR':
-            console.error(error);
-            break;
+            throw event.error;
           case 'END':
             console.log(`Successful build. (${inputOptions.input})`);
             break;
