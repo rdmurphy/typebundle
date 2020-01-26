@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2019-01-26
+
+### Added
+
+- Terser is now told to compress and output with `ES2017` in mind. This seems like a safe level to be at because Node v10 supports nearly all features up to `ES2017`.
+
+### Fixed
+
+- Thanks to an update to `rollup-plugin-dts`, type generation in scenarios where there are local declaration files works again.
+
+### Changed
+
+- The new monorepo versions of the Rollup plugins have been swapped in.
+- `typebundle` is now building itself with a `nodeTarget` of `10`.
+
 ## [0.6.0] - 2019-10-04
 
 ### Changed

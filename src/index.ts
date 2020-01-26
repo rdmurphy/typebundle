@@ -15,10 +15,10 @@ import {
   RollupWatchOptions,
 } from 'rollup';
 import babel from 'rollup-plugin-babel';
-import commonjs from 'rollup-plugin-commonjs';
+import commonjs from '@rollup/plugin-commonjs';
 import dts from 'rollup-plugin-dts';
-import json from 'rollup-plugin-json';
-import nodeResolve from 'rollup-plugin-node-resolve';
+import json from '@rollup/plugin-json';
+import nodeResolve from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
 import glob from 'tiny-glob';
 
@@ -98,8 +98,9 @@ async function createRollupConfig({
       }),
       compress &&
         terser({
-          output: { comments: false },
+          output: { ecma: 2017, comments: false },
           compress: {
+            ecma: 2017,
             keep_infinity: true,
             pure_getters: true,
             passes: 10,
