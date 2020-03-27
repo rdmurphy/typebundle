@@ -1,19 +1,12 @@
 // native
-import { basename, format, parse, resolve } from 'path';
+import { promises as fs } from 'fs';
+import { basename, dirname, format, parse, resolve } from 'path';
 
 // packages
 import babelPresetEnv from '@babel/preset-env';
 import babelPresetTypescript from '@babel/preset-typescript';
 import builtinModules from 'builtin-modules';
-import { outputFile, readFile } from 'fs-extra';
-import {
-  rollup,
-  watch,
-  OutputOptions,
-  InputOptions,
-  RollupWarning,
-  RollupWatchOptions,
-} from 'rollup';
+import { rollup, watch } from 'rollup';
 import babel from 'rollup-plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import dts from 'rollup-plugin-dts';
@@ -22,11 +15,30 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
 import glob from 'tiny-glob';
 
+// types
+import type {
+  OutputOptions,
+  InputOptions,
+  RollupWarning,
+  RollupWatchOptions,
+} from 'rollup';
+
 const extensions = ['.ts', '.js', '.mjs'];
 const hashbangRegex = /^#!(.*)/;
 
+async function outputFile(filepath: string, data: any) {
+  // determine the directory
+  const dir = dirname(filepath);
+
+  // make sure the directory exists
+  await fs.mkdir(dir, { recursive: true });
+
+  // write the file
+  await fs.writeFile(filepath, data);
+}
+
 async function getConfig(cwd: string) {
-  const pkg = await readFile(resolve(cwd, 'package.json'), 'utf8');
+  const pkg = await fs.readFile(resolve(cwd, 'package.json'), 'utf8');
 
   return JSON.parse(pkg);
 }
@@ -58,7 +70,7 @@ async function createRollupConfig({
 
   const inputOptions: InputOptions = {
     input,
-    external: id => {
+    external: (id) => {
       // a special case for when we are importing a local index
       if (withMultipleInputs && id === '.') {
         return true;
@@ -92,8 +104,11 @@ async function createRollupConfig({
         exclude: 'node_modules/**',
         extensions,
         presets: [
-          [babelPresetEnv, { targets: { node: nodeTarget } }],
-          babelPresetTypescript,
+          [babelPresetEnv, { bugfixes: true, targets: { node: nodeTarget } }],
+          [
+            babelPresetTypescript,
+            { allowDeclareFields: true, onlyRemoveTypeImports: true },
+          ],
         ],
       }),
       compress &&
@@ -224,7 +239,7 @@ export async function bundler({
     const entry = inputs[idx];
 
     const externalDependencies = pkgDependencies.concat(
-      inputs.filter(e => e !== entry)
+      inputs.filter((e) => e !== entry)
     );
 
     const options = await createRollupConfig({
@@ -256,7 +271,7 @@ export async function bundler({
 
       const watcher = watch(watchOptions);
 
-      watcher.on('event', event => {
+      watcher.on('event', (event) => {
         switch (event.code) {
           case 'ERROR':
             throw event.error;
