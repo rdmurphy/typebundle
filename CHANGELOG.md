@@ -7,7 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.7.0] - 2019-01-26
+## [0.8.0] - 2020-03-27
+
+### Changed
+
+- Updated Babel, Rollup and TypeScript dependencies to take advantaged of latest features.
+
+### Removed
+
+- The `fs-extra` library has been removed and replaced by native functions.
+
+## [0.7.0] - 2020-01-26
 
 ### Added
 
