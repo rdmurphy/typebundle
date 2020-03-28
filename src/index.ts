@@ -4,7 +4,8 @@ import { basename, dirname, format, parse, resolve } from 'path';
 
 // packages
 import babelPresetEnv from '@babel/preset-env';
-import babelPresetTypescript from '@babel/preset-typescript';
+import babelPluginTransformTypeScript from '@babel/plugin-transform-typescript';
+import babelPluginClassProperties from '@babel/plugin-proposal-class-properties';
 import builtinModules from 'builtin-modules';
 import { rollup, watch } from 'rollup';
 import babel from 'rollup-plugin-babel';
@@ -105,10 +106,13 @@ async function createRollupConfig({
         extensions,
         presets: [
           [babelPresetEnv, { bugfixes: true, targets: { node: nodeTarget } }],
+        ],
+        plugins: [
           [
-            babelPresetTypescript,
+            babelPluginTransformTypeScript,
             { allowDeclareFields: true, onlyRemoveTypeImports: true },
           ],
+          babelPluginClassProperties,
         ],
       }),
       compress &&
@@ -199,6 +203,7 @@ async function createTypes({
 
 interface BundlerOptions {
   compress: boolean;
+  external?: string[];
   input: string;
   nodeTarget: string;
   outputDir: string;
@@ -208,6 +213,7 @@ interface BundlerOptions {
 
 export async function bundler({
   compress,
+  external = [],
   input,
   nodeTarget,
   outputDir,
@@ -239,7 +245,8 @@ export async function bundler({
     const entry = inputs[idx];
 
     const externalDependencies = pkgDependencies.concat(
-      inputs.filter((e) => e !== entry)
+      inputs.filter((e) => e !== entry),
+      external
     );
 
     const options = await createRollupConfig({
