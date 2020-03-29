@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2020-03-28
+
+### Added
+
+- Added Babel support for the class properties proposal with `@babel/plugin-proposal-class-properties` in `loose` mode.
+- Added the `--external` parameter to the CLI, which makes it possible to pass additional external dependencies to not bundle. This will get passed to a precompiled regular expression so partial matches are permitted. Typically not needed, but a helpful escape hatch if you have nested dependencies causing circular dependencies or errors (which Typebundle **itself** was suffering from).
+
+### Changed
+
+- Updated to features available in TypeScript 3.8. Your mileage may vary with lesser versions.
+
+### Fixed
+
+- The addition of class properties means Typebundle no longer crashes when class properties (without TypeScript 3.8's `declare`) are used.
+
 ## [0.8.0] - 2020-03-27
 
 ### Changed
@@ -60,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Typescript declaration files (`.d.ts`) are now automatically generated as part of the bundle.
+- TypeScript declaration files (`.d.ts`) are now automatically generated as part of the bundle.
 
 ## [0.2.0] - 2019-07-27
 

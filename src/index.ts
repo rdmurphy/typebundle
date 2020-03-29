@@ -112,7 +112,7 @@ async function createRollupConfig({
             babelPluginTransformTypeScript,
             { allowDeclareFields: true, onlyRemoveTypeImports: true },
           ],
-          babelPluginClassProperties,
+          [babelPluginClassProperties, { loose: true }],
         ],
       }),
       compress &&
