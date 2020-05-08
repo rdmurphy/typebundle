@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2020-05-08
+
+### Changed
+
+- `rollup-plugin-babel` has been migrated to its new namespaced version `@rollup/plugin-babel` to squash a warning.
+- Other dependency updates.
+
+## [0.9.0] - 2020-03-28
+
+### Added
+
+- Added Babel support for the class properties proposal with `@babel/plugin-proposal-class-properties` in `loose` mode.
+- Added the `--external` parameter to the CLI, which makes it possible to pass additional external dependencies to not bundle. This will get passed to a precompiled regular expression so partial matches are permitted. Typically not needed, but a helpful escape hatch if you have nested dependencies causing circular dependencies or errors (which Typebundle **itself** was suffering from).
+
+### Changed
+
+- Updated to features available in TypeScript 3.8. Your mileage may vary with lesser versions.
+
+### Fixed
+
+- The addition of class properties means Typebundle no longer crashes when class properties (without TypeScript 3.8's `declare`) are used.
+
+## [0.8.0] - 2020-03-27
+
+### Changed
+
+- Updated Babel, Rollup and TypeScript dependencies to take advantaged of latest features.
+
+### Removed
+
+- The `fs-extra` library has been removed and replaced by native functions.
+
+## [0.7.0] - 2020-01-26
+
+### Added
+
+- Terser is now told to compress and output with `ES2017` in mind. This seems like a safe level to be at because Node v10 supports nearly all features up to `ES2017`.
+
+### Fixed
+
+- Thanks to an update to `rollup-plugin-dts`, type generation in scenarios where there are local declaration files works again.
+
+### Changed
+
+- The new monorepo versions of the Rollup plugins have been swapped in.
+- `typebundle` is now building itself with a `nodeTarget` of `10`.
+
 ## [0.6.0] - 2019-10-04
 
 ### Changed
@@ -35,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Typescript declaration files (`.d.ts`) are now automatically generated as part of the bundle.
+- TypeScript declaration files (`.d.ts`) are now automatically generated as part of the bundle.
 
 ## [0.2.0] - 2019-07-27
 

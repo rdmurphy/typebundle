@@ -1,25 +1,45 @@
 // native
-import { basename, format, parse, resolve } from 'path';
+import { promises as fs } from 'fs';
+import { basename, dirname, format, parse, resolve } from 'path';
 
 // packages
 import babelPresetEnv from '@babel/preset-env';
-import babelPresetTypescript from '@babel/preset-typescript';
+import babelPluginTransformTypeScript from '@babel/plugin-transform-typescript';
+import babelPluginClassProperties from '@babel/plugin-proposal-class-properties';
 import builtinModules from 'builtin-modules';
-import { outputFile, readFile } from 'fs-extra';
-import { rollup, watch, OutputOptions, InputOptions } from 'rollup';
-import babel from 'rollup-plugin-babel';
-import commonjs from 'rollup-plugin-commonjs';
+import { rollup, watch } from 'rollup';
+import babel from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
 import dts from 'rollup-plugin-dts';
-import json from 'rollup-plugin-json';
-import nodeResolve from 'rollup-plugin-node-resolve';
+import json from '@rollup/plugin-json';
+import nodeResolve from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
 import glob from 'tiny-glob';
+
+// types
+import type {
+  OutputOptions,
+  InputOptions,
+  RollupWarning,
+  RollupWatchOptions,
+} from 'rollup';
 
 const extensions = ['.ts', '.js', '.mjs'];
 const hashbangRegex = /^#!(.*)/;
 
+async function outputFile(filepath: string, data: any) {
+  // determine the directory
+  const dir = dirname(filepath);
+
+  // make sure the directory exists
+  await fs.mkdir(dir, { recursive: true });
+
+  // write the file
+  await fs.writeFile(filepath, data);
+}
+
 async function getConfig(cwd: string) {
-  const pkg = await readFile(resolve(cwd, 'package.json'), 'utf8');
+  const pkg = await fs.readFile(resolve(cwd, 'package.json'), 'utf8');
 
   return JSON.parse(pkg);
 }
@@ -52,7 +72,7 @@ async function createRollupConfig({
 
   const inputOptions: InputOptions = {
     input,
-    external: id => {
+    external: (id) => {
       // a special case for when we are importing a local index
       if (withMultipleInputs && id === '.') {
         return true;
@@ -86,19 +106,27 @@ async function createRollupConfig({
         exclude: 'node_modules/**',
         extensions,
         presets: [
-          [babelPresetEnv, { targets: { node: nodeTarget } }],
-          babelPresetTypescript,
+          [babelPresetEnv, { bugfixes: true, targets: { node: nodeTarget } }],
         ],
+        plugins: [
+          [
+            babelPluginTransformTypeScript,
+            { allowDeclareFields: true, onlyRemoveTypeImports: true },
+          ],
+          [babelPluginClassProperties, { loose: true }],
+        ],
+        babelHelpers: 'bundled',
       }),
       compress &&
         terser({
           compress: {
+            ecma: 2017,
             keep_infinity: true,
             pure_getters: true,
             passes: 10,
           },
           ecma: 8,
-          output: { comments: false },
+          output: { ecma: 2017, comments: false },
           toplevel: true,
           warnings: true,
         }),
@@ -136,7 +164,7 @@ async function createRollupConfig({
   return { inputOptions, outputOptions };
 }
 
-function dtsOnWarn(warning: { code: string; message: string }) {
+function dtsOnWarn(warning: RollupWarning) {
   if (warning.code === 'EMPTY_BUNDLE') return;
 
   console.error(warning.message);
@@ -150,7 +178,7 @@ async function createTypes({
   outputDir: string;
 }) {
   // build our Rollup input options for rollup-plugin-dts
-  const inputOptions = {
+  const inputOptions: InputOptions = {
     input,
     plugins: [dts()],
     onwarn: dtsOnWarn,
@@ -163,7 +191,7 @@ async function createTypes({
   const { name } = parse(input);
 
   // build our Rollup output options
-  const outputOptions = {
+  const outputOptions: OutputOptions = {
     file: resolve(outputDir, format({ name, ext: '.d.ts' })),
     format: 'esm',
   };
@@ -187,6 +215,7 @@ async function createTypes({
 interface BundlerOptions {
   compress: boolean;
   esm: boolean;
+  external?: string[];
   input: string;
   nodeTarget: string;
   outputDir: string;
@@ -197,6 +226,7 @@ interface BundlerOptions {
 export async function bundler({
   compress,
   esm,
+  external = [],
   input,
   nodeTarget,
   outputDir,
@@ -228,7 +258,8 @@ export async function bundler({
     const entry = inputs[idx];
 
     const externalDependencies = pkgDependencies.concat(
-      inputs.filter(e => e !== entry)
+      inputs.filter((e) => e !== entry),
+      external
     );
 
     const options = await createRollupConfig({
@@ -247,7 +278,7 @@ export async function bundler({
 
   for (const { inputOptions, outputOptions } of runs) {
     if (watchBuild) {
-      const watcher = watch(
+      const watchOptions: RollupWatchOptions[] = [
         Object.assign(
           {
             output: outputOptions,
@@ -256,16 +287,15 @@ export async function bundler({
             },
           },
           inputOptions
-        )
-      );
+        ),
+      ];
 
-      watcher.on('event', ({ code, error }) => {
-        switch (code) {
-          case 'FATAL':
-            throw new Error(error);
+      const watcher = watch(watchOptions);
+
+      watcher.on('event', (event) => {
+        switch (event.code) {
           case 'ERROR':
-            console.error(error);
-            break;
+            throw event.error;
           case 'END':
             console.log(`Successful build. (${inputOptions.input})`);
             break;

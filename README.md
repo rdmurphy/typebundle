@@ -19,19 +19,19 @@ Typebundle's primary interface is on the command line. The only required positio
 #### A single source file
 
 ```sh
-typebundle src/index.ts --output dist --target 8
+typebundle src/index.ts --output dist --target 10
 ```
 
 #### Multiple source files
 
 ```sh
-typebundle "src/{cli,index}.ts" --output dist --target 8
+typebundle "src/{cli,index}.ts" --output dist --target 10
 ```
 
 #### Run in watch mode
 
 ```sh
-typebundle src/index.ts --output dist --target 8 --watch
+typebundle src/index.ts --output dist --target 10 --watch
 ```
 
 ## Options
