@@ -1,6 +1,6 @@
 {
   "name": "typebundle",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "A personalized build process for Node.js projects using Babel-compiled TypeScript.",
   "main": "dist/index.js",
   "source": "src/index.js",
