@@ -8,7 +8,7 @@ import babelPluginTransformTypeScript from '@babel/plugin-transform-typescript';
 import babelPluginClassProperties from '@babel/plugin-proposal-class-properties';
 import builtinModules from 'builtin-modules';
 import { rollup, watch } from 'rollup';
-import babel from 'rollup-plugin-babel';
+import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import dts from 'rollup-plugin-dts';
 import json from '@rollup/plugin-json';
@@ -114,6 +114,7 @@ async function createRollupConfig({
           ],
           [babelPluginClassProperties, { loose: true }],
         ],
+        babelHelpers: 'bundled',
       }),
       compress &&
         terser({

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2020-05-08
+
+### Changed
+
+- `rollup-plugin-babel` has been migrated to its new namespaced version `@rollup/plugin-babel` to squash a warning.
+- Other dependency updates.
+
 ## [0.9.0] - 2020-03-28
 
 ### Added
