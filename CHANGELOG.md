@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2020-05-08
+
+### Fixed
+
+- `rollup-plugin-dts` needs to be told to ignore built-in modules so it doesn't throw a warning when it comes across one. I don't think this was actually breaking anything, but no noise is the best noise.
+
 ## [0.10.0] - 2020-05-08
 
 ### Changed

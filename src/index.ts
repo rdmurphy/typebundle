@@ -170,6 +170,7 @@ async function createTypes({
   // build our Rollup input options for rollup-plugin-dts
   const inputOptions: InputOptions = {
     input,
+    external: builtinModules as string[],
     plugins: [dts()],
     onwarn: dtsOnWarn,
   };
