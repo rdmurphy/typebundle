@@ -51,7 +51,7 @@
     "mri": "^1.1.4",
     "rollup": "^2.2.0",
     "rollup-plugin-dts": "^1.4.1",
-    "rollup-plugin-terser": "^5.1.2",
+    "rollup-plugin-terser": "^6.1.0",
     "tiny-glob": "^0.2.6",
     "typescript": "^3.8.3"
   },
