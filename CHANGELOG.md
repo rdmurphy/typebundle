@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated dependencies, including bumping TypeScript to `^4.0.0`.
+- The default value of `--target` is now unset (previously `current`), meaning when this option is not passed `@babel/preset-env` is not used _at all_. It is now **optional** for the code to be transpiled (**except** for class properties for TypeScript compatibility). Users should only opt-in (by passing `--target`) when they know for certain code they are writing is not compatible with versions of Node they are targeting and would like `@babel/preset-env` to handle it. Otherwise Babel is primarily being used to strip types.
+- `rollup-plugin-terser`'s options have been updated to match the new types, and the default `ecma` option is now `2019`.
 
 ## [0.11.0] - 2020-05-08
 

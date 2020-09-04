@@ -24,6 +24,8 @@ import type {
   RollupWatchOptions,
 } from 'rollup';
 
+type NodeTarget = string | 'current' | boolean;
+
 const extensions = ['.ts', '.js', '.mjs'];
 const hashbangRegex = /^#!(.*)/;
 
@@ -48,7 +50,7 @@ interface createRollupConfigOptions {
   compress?: boolean;
   externalDependencies?: string[];
   input: string;
-  nodeTarget?: string;
+  nodeTarget?: NodeTarget;
   withMultipleInputs: boolean;
   outputDir: string;
   pkgMain: string;
@@ -58,7 +60,7 @@ async function createRollupConfig({
   compress = true,
   externalDependencies = [],
   input,
-  nodeTarget = 'current',
+  nodeTarget,
   withMultipleInputs,
   outputDir,
   pkgMain,
@@ -104,9 +106,14 @@ async function createRollupConfig({
         babelrc: false,
         exclude: 'node_modules/**',
         extensions,
-        presets: [
-          [babelPresetEnv, { bugfixes: true, targets: { node: nodeTarget } }],
-        ],
+        presets: nodeTarget
+          ? [
+              [
+                babelPresetEnv,
+                { bugfixes: true, targets: { node: nodeTarget } },
+              ],
+            ]
+          : undefined,
         plugins: [
           [
             babelPluginTransformTypeScript,
@@ -116,18 +123,7 @@ async function createRollupConfig({
         ],
         babelHelpers: 'bundled',
       }),
-      compress &&
-        terser({
-          compress: {
-            keep_infinity: true,
-            pure_getters: true,
-            passes: 10,
-          },
-          ecma: 2019,
-          format: { comments: false },
-          toplevel: true,
-        }),
-    ].filter(Boolean),
+    ],
   };
 
   const inputFileName = parse(input).name;
@@ -146,9 +142,23 @@ async function createRollupConfig({
       file: resolve(outputDir, `${inputFileName}.js`),
       format: 'cjs' as const,
       paths,
+      plugins: compress
+        ? [
+            terser({
+              compress: {
+                keep_infinity: true,
+                pure_getters: true,
+                passes: 10,
+              },
+              ecma: 2019,
+              format: { comments: false },
+              toplevel: true,
+            }),
+          ]
+        : undefined,
       strict: false,
     },
-  ].filter(Boolean);
+  ];
 
   return { inputOptions, outputOptions };
 }
@@ -206,7 +216,7 @@ interface BundlerOptions {
   compress: boolean;
   external?: string[];
   input: string;
-  nodeTarget: string;
+  nodeTarget?: NodeTarget;
   outputDir: string;
   typesDir?: string;
   watchBuild?: boolean;
@@ -266,15 +276,13 @@ export async function bundler({
   for (const { inputOptions, outputOptions } of runs) {
     if (watchBuild) {
       const watchOptions: RollupWatchOptions[] = [
-        Object.assign(
-          {
-            output: outputOptions,
-            watch: {
-              exclude: 'node_modules/**',
-            },
+        {
+          output: outputOptions,
+          watch: {
+            exclude: 'node_modules/**',
           },
-          inputOptions
-        ),
+          ...inputOptions,
+        },
       ];
 
       const watcher = watch(watchOptions);

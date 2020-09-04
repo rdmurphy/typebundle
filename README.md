@@ -41,9 +41,11 @@ typebundle src/index.ts --output dist --target 10 --watch
 
 --compress    If passed, "terser" will be used to minify the output
 
---target      The minimum version of Node.js to target for transpiling, this
-              is passed directly to "@babel/preset-env" at "targets.node",
-              defaults to "current"
+--target      The optional minimum version of Node.js to target for
+              transpiling, this is passed directly to "@babel/preset-env" at
+              "targets.node". To target the current version of Node, pass
+              "current". If not provided no code will run through
+              "@babel/preset-env" and only types will be stripped.
 
 --types       The directory where "d.ts" files are output, defaults to where
               --output is set
