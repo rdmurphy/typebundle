@@ -10,7 +10,6 @@ const mriConfig = {
   boolean: ['compress', 'esm'],
   default: {
     compress: false,
-    esm: false,
     output: 'dist',
     watch: false,
   },
@@ -23,7 +22,6 @@ async function main(argv_: string[]) {
   const input = args._[0];
 
   const compress = args.compress;
-  const esm = args.esm;
 
   let external;
 
@@ -38,7 +36,6 @@ async function main(argv_: string[]) {
 
   await bundler({
     compress,
-    esm,
     external,
     input,
     nodeTarget,
