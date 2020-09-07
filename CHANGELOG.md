@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added `outputs.export` to `OutputOptions` so Rollup no longer throws a warning.
+
 ### Changed
 
 - Updated dependencies, including bumping TypeScript to `^4.0.0`.

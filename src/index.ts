@@ -119,7 +119,7 @@ async function createRollupConfig({
             babelPluginTransformTypeScript,
             { allowDeclareFields: true, onlyRemoveTypeImports: true },
           ],
-          [babelPluginClassProperties, { loose: true }],
+          babelPluginClassProperties,
         ],
         babelHelpers: 'bundled',
       }),
@@ -139,6 +139,7 @@ async function createRollupConfig({
     {
       banner: bannerFn,
       esModule: false,
+      exports: 'auto',
       file: resolve(outputDir, `${inputFileName}.js`),
       format: 'cjs' as const,
       paths,
