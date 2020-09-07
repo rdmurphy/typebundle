@@ -18,7 +18,7 @@
     "build:babel": "babel-node --extensions \".ts\" src/cli.ts \"src/{cli,index}.ts\" --output=dist --compress --types=types --external=@babel",
     "build:self": "node dist/cli.js \"src/{cli,index}.ts\" --output=dist --compress --types=types --external=@babel",
     "prerelease": "npm run build",
-    "release": "np --no-yarn",
+    "release": "np --no-yarn --no-tests",
     "test": "npm run -s test:babel && npm run -s build:self",
     "test:babel": "babel-node --extensions \".ts\" src/cli.ts \"src/{cli,index}.ts\" --target=current --output=dist --compress --types=types --external=@babel",
     "test:self": "node dist/cli.js \"src/{cli,index}.ts\" --target=current --output=dist --compress --types=types --external=@babel",
