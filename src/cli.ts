@@ -29,7 +29,7 @@ async function main(argv_: string[]) {
     external = Array.isArray(args.external) ? args.external : [args.external];
   }
 
-  const nodeTarget = args.target;
+  const target = args.target;
   const outputDir = args.output;
   const typesDir = args.types;
   const watchBuild = args.watch;
@@ -38,7 +38,7 @@ async function main(argv_: string[]) {
     compress,
     external,
     input,
-    nodeTarget,
+    target,
     outputDir,
     typesDir,
     watchBuild,

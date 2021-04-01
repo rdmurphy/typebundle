@@ -15,8 +15,8 @@
   ],
   "scripts": {
     "build": "npm run -s build:babel && npm run -s build:self",
-    "build:babel": "babel-node --extensions \".ts\" src/cli.ts \"src/{cli,index}.ts\" --output=dist --compress --types=types --external=@babel",
-    "build:self": "node dist/cli.js \"src/{cli,index}.ts\" --output=dist --compress --types=types --external=@babel",
+    "build:babel": "node -r esbuild-register src/cli.ts \"src/{cli,index}.ts\" --output=dist --compress --types=types",
+    "build:self": "node dist/cli.js \"src/{cli,index}.ts\" --output=dist --compress --types=types",
     "prerelease": "npm run build",
     "release": "np --no-yarn --no-tests",
     "test": "npm run -s test:babel && npm run -s build:self",
@@ -42,30 +42,28 @@
   },
   "homepage": "https://github.com/rdmurphy/typebundle#readme",
   "dependencies": {
-    "@babel/core": "^7.11.6",
-    "@babel/plugin-proposal-class-properties": "^7.10.4",
-    "@babel/preset-env": "^7.9.0",
-    "@babel/preset-typescript": "^7.10.4",
-    "@rollup/plugin-babel": "^5.0.0",
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-json": "^4.0.1",
-    "@rollup/plugin-node-resolve": "^11.0.0",
-    "builtin-modules": "^3.1.0",
-    "mri": "^1.1.4",
-    "rollup": "^2.2.0",
-    "rollup-plugin-dts": "^2.0.0",
-    "rollup-plugin-terser": "^7.0.1",
-    "tiny-glob": "^0.2.6",
-    "typescript": "^4.0.2"
+    "rollup": "^2.43.1",
+    "rollup-plugin-terser": "^7.0.2"
   },
   "devDependencies": {
-    "@babel/node": "^7.10.5",
     "@newswire/prettier-config": "^3.0.0",
-    "@types/fs-extra": "^9.0.1",
+    "@rollup/plugin-commonjs": "^18.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.1",
     "@types/mri": "^1.1.0",
-    "@types/node": "^14.6.4",
+    "@types/node": "^14.14.37",
+    "builtin-modules": "^3.2.0",
+    "esbuild": "0.11.0",
+    "esbuild-register": "^2.3.0",
+    "mri": "^1.1.6",
     "np": "^7.0.0",
-    "prettier": "^2.0.2"
+    "prettier": "^2.0.2",
+    "rollup-plugin-dts": "^3.0.1",
+    "tiny-glob": "^0.2.8"
+  },
+  "peerDependencies": {
+    "esbuild": "^0.11.0",
+    "typescript": "^4.2.3"
   },
   "prettier": "@newswire/prettier-config"
 }

@@ -1,14 +1,9 @@
 // native
 import { promises as fs } from 'fs';
 import { basename, dirname, format, parse, resolve } from 'path';
-
 // packages
-import babelPresetEnv from '@babel/preset-env';
-import babelPluginTransformTypeScript from '@babel/plugin-transform-typescript';
-import babelPluginClassProperties from '@babel/plugin-proposal-class-properties';
 import builtinModules from 'builtin-modules';
 import { rollup, watch } from 'rollup';
-import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import dts from 'rollup-plugin-dts';
 import json from '@rollup/plugin-json';
@@ -16,7 +11,11 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
 import glob from 'tiny-glob';
 
+// local
+import { esbuildPlugin } from './plugins/esbuild';
+
 // types
+import type { TransformOptions } from 'esbuild';
 import type {
   OutputOptions,
   InputOptions,
@@ -24,9 +23,7 @@ import type {
   RollupWatchOptions,
 } from 'rollup';
 
-type NodeTarget = string | 'current' | boolean;
-
-const extensions = ['.ts', '.js', '.mjs'];
+const extensions = ['.ts', '.js', '.mjs', '.cjs'];
 const hashbangRegex = /^#!(.*)/;
 
 async function outputFile(filepath: string, data: any) {
@@ -50,7 +47,7 @@ interface createRollupConfigOptions {
   compress?: boolean;
   externalDependencies?: string[];
   input: string;
-  nodeTarget?: NodeTarget;
+  target?: TransformOptions['target'];
   withMultipleInputs: boolean;
   outputDir: string;
   pkgMain: string;
@@ -60,7 +57,7 @@ async function createRollupConfig({
   compress = true,
   externalDependencies = [],
   input,
-  nodeTarget,
+  target,
   withMultipleInputs,
   outputDir,
   pkgMain,
@@ -99,31 +96,19 @@ async function createRollupConfig({
           };
         },
       },
+
       nodeResolve({ extensions }),
-      commonjs(),
+      esbuildPlugin({ target }),
       json(),
-      babel({
-        babelrc: false,
-        exclude: 'node_modules/**',
-        extensions,
-        presets: nodeTarget
-          ? [
-              [
-                babelPresetEnv,
-                { bugfixes: true, targets: { node: nodeTarget } },
-              ],
-            ]
-          : undefined,
-        plugins: [
-          [
-            babelPluginTransformTypeScript,
-            { allowDeclareFields: true, onlyRemoveTypeImports: true },
-          ],
-          babelPluginClassProperties,
-        ],
-        babelHelpers: 'bundled',
-      }),
+      commonjs(),
     ],
+    onwarn(warning, warningHandler) {
+      if (warning.code === 'CIRCULAR_DEPENDENCY') {
+        return;
+      }
+
+      warningHandler(warning);
+    },
   };
 
   const inputFileName = parse(input).name;
@@ -172,16 +157,18 @@ function dtsOnWarn(warning: RollupWarning) {
 
 async function createTypes({
   input,
+  externalDependencies = [],
   outputDir,
 }: {
   input: string;
+  externalDependencies: string[];
   outputDir: string;
 }) {
   // build our Rollup input options for rollup-plugin-dts
   const inputOptions: InputOptions = {
     input,
-    external: builtinModules as string[],
-    plugins: [dts()],
+    external: externalDependencies.concat(builtinModules),
+    plugins: [dts({ respectExternal: true })],
     onwarn: dtsOnWarn,
   };
 
@@ -217,7 +204,7 @@ interface BundlerOptions {
   compress: boolean;
   external?: string[];
   input: string;
-  nodeTarget?: NodeTarget;
+  target?: TransformOptions['target'];
   outputDir: string;
   typesDir?: string;
   watchBuild?: boolean;
@@ -227,7 +214,7 @@ export async function bundler({
   compress,
   external = [],
   input,
-  nodeTarget,
+  target,
   outputDir,
   typesDir,
   watchBuild,
@@ -242,7 +229,10 @@ export async function bundler({
   const pkg = await getConfig(cwd);
 
   // pull out all of the dependencies to flag externals
-  const pkgDependencies = Object.keys(pkg.dependencies || {});
+  const pkgDependencies = [
+    ...Object.keys(pkg.dependencies || {}),
+    ...Object.keys(pkg.peerDependencies || {}),
+  ];
 
   // find all the input TypeScript files
   const inputs = await glob(input);
@@ -265,7 +255,7 @@ export async function bundler({
       compress,
       externalDependencies,
       input: entry,
-      nodeTarget,
+      target,
       withMultipleInputs,
       outputDir,
       pkgMain: pkg.main,
@@ -306,6 +296,7 @@ export async function bundler({
         await bundle.write(output);
         await createTypes({
           input: inputOptions.input as string,
+          externalDependencies: pkgDependencies,
           outputDir: typesDir,
         });
       }
