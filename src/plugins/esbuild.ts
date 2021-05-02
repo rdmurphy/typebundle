@@ -3,7 +3,9 @@ import { extname } from 'path';
 
 // packages
 import { transform, TransformOptions } from 'esbuild';
-import { Plugin } from 'rollup';
+
+// types
+import type { Plugin } from 'rollup';
 
 async function transformWithEsbuild(
   code: string,

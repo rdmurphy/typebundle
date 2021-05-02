@@ -9,11 +9,11 @@ import commonjs from '@rollup/plugin-commonjs';
 import dts from 'rollup-plugin-dts';
 import json from '@rollup/plugin-json';
 import nodeResolve from '@rollup/plugin-node-resolve';
-import { terser } from 'rollup-plugin-terser';
 import glob from 'tiny-glob';
 
 // local
 import { esbuildPlugin } from './plugins/esbuild';
+import { terserPlugin } from './plugins/terser';
 
 // types
 import type { TransformOptions } from 'esbuild';
@@ -102,7 +102,8 @@ async function createRollupConfig({
       esbuildPlugin({ target }),
       json(),
       commonjs(),
-    ],
+      compress ? terserPlugin() : undefined,
+    ].filter(Boolean) as Plugin[],
     onwarn(warning, warningHandler) {
       if (warning.code === 'CIRCULAR_DEPENDENCY') {
         return;
@@ -129,20 +130,6 @@ async function createRollupConfig({
       file: resolve(outputDir, `${inputFileName}.js`),
       format: 'cjs' as const,
       paths,
-      plugins: compress
-        ? [
-            terser({
-              compress: {
-                keep_infinity: true,
-                pure_getters: true,
-                passes: 10,
-              },
-              ecma: 2019,
-              format: { comments: false },
-              toplevel: true,
-            }),
-          ]
-        : undefined,
       strict: false,
     },
   ];
@@ -187,6 +174,9 @@ async function createTypes({
 
   // generate our .d.ts file
   const results = await bundle.generate(outputOptions);
+
+  // close out our bundle
+  await bundle.close();
 
   // we have only a single output
   const output = results.output[0];
@@ -301,6 +291,8 @@ export async function bundler({
           outputDir: typesDir,
         });
       }
+
+      await bundle.close();
     }
   }
 }

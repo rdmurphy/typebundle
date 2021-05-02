@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 - Everything Babel has been purged in favor of `esbuild`. It's faster and (mostly) easier to configure. Ultimately what `typebundle` needed the most is a way to strip out TypeScript types, and `esbuild` is quick about it.
-- 
+- Most dependencies in `typebundle` are now being bundled with the library, which should make it quicker to install and a little smaller on disk. `rollup` and `terser` are still dependencies, and `esbuild` and `typescript` are `peerDependencies` to allow users to have control over versioning.
 
 ## [0.12.0] - 2020-09-06
 
