@@ -1,26 +1,23 @@
 {
   "name": "typebundle",
   "version": "0.12.0",
-  "description": "A personalized build process for Node.js projects using Babel-compiled TypeScript.",
+  "description": "A personalized build process for Node.js projects using esbuild-compiled TypeScript.",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "source": "src/index.js",
-  "bin": {
-    "typebundle": "dist/cli.js"
-  },
+  "source": "src/index.ts",
+  "bin": "dist/cli.js",
   "files": [
     "src",
     "dist",
     "types"
   ],
   "scripts": {
-    "build": "npm run -s build:babel && npm run -s build:self",
-    "build:babel": "node -r esbuild-register src/cli.ts \"src/{cli,index}.ts\" --output=dist --compress --types=types",
-    "build:self": "node dist/cli.js \"src/{cli,index}.ts\" --output=dist --compress --types=types",
+    "build": "npm run -s build:esbuild && npm run -s build:self",
+    "build:esbuild": "node -r esbuild-register src/cli.ts \"src/{cli,index}.ts\" --output=dist --compress --types=types --target=node12",
+    "build:self": "node dist/cli.js \"src/{cli,index}.ts\" --output=dist --compress --types=types --target=node12",
     "prerelease": "npm run build",
     "release": "np --no-yarn --no-tests",
     "test": "npm run build",
-    "watch": "npm run build:babel -- --watch --no-compress"
+    "watch": "npm run build:esbuild -- --watch --no-compress"
   },
   "repository": {
     "type": "git",

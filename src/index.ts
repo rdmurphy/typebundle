@@ -1,6 +1,7 @@
 // native
 import { promises as fs } from 'fs';
 import { basename, dirname, format, parse, resolve } from 'path';
+
 // packages
 import builtinModules from 'builtin-modules';
 import { rollup, watch } from 'rollup';
@@ -114,7 +115,7 @@ async function createRollupConfig({
   const inputFileName = parse(input).name;
   const bannerFn = () => banner;
 
-  const paths = {} as { [key: string]: string };
+  const paths = {} as Record<string, string>;
 
   if (pkgMain) {
     paths['.'] = `./${basename(pkgMain)}`;

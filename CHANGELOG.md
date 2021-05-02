@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Changed
-- Everything Babel has been purged in favor of `esbuild`. It's faster and (mostly) easier to configure. Ultimately what `typebundle` needs the most is a way to strip out TypeScript types, and `esbuild` is quick about it.
+- Everything Babel has been purged in favor of `esbuild`. It's faster and (mostly) easier to configure. Ultimately what `typebundle` needed the most is a way to strip out TypeScript types, and `esbuild` is quick about it.
 - 
 
 ## [0.12.0] - 2020-09-06
