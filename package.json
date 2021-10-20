@@ -47,7 +47,7 @@
     "@babel/preset-env": "^7.9.0",
     "@babel/preset-typescript": "^7.10.4",
     "@rollup/plugin-babel": "^5.0.0",
-    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-json": "^4.0.1",
     "@rollup/plugin-node-resolve": "^13.0.2",
     "builtin-modules": "^3.1.0",
